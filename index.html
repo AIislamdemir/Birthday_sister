@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>İyi Ki Doğdun Büşra! 🎉</title>
+  <!-- Konfeti Kütüphanesi -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: #0b0c10;
+      color: #fff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Arka Plan Yıldız/Işıltı Efekti */
+    .bg-glow {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255, 65, 108, 0.2) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .step {
+      display: none;
+      width: 100%;
+      max-width: 420px;
+      padding: 20px;
+      text-align: center;
+      z-index: 1;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    .step.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Buton Tasarımları */
+    .btn {
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      color: white;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 25px;
+      box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    /* AŞAMA 1: Giriş Yazıları */
+    #step1 {
+      min-height: 250px;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .story-text {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      color: #e0e0e0;
+      min-height: 80px;
+    }
+
+    .tap-hint {
+      margin-top: 30px;
+      font-size: 0.85rem;
+      color: #ff416c;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    /* AŞAMA 2: Pasta ve Mumu */
+    .cake-container {
+      margin: 30px 0;
+      cursor: pointer;
+    }
+
+    .cake {
+      width: 120px;
+      height: 90px;
+      background: #f8a5c2;
+      border-radius: 10px 10px 0 0;
+      position: relative;
+      margin: 0 auto;
+      box-shadow: 0 8px 0 #f78fb3;
+    }
+
+    .candle {
+      width: 10px;
+      height: 30px;
+      background: #fff;
+      position: absolute;
+      top: -30px;
+      left: 55px;
+      border-radius: 3px;
+    }
+
+    .flame {
+      width: 12px;
+      height: 16px;
+      background: #fffa65;
+      border-radius: 50% 50% 20% 20%;
+      position: absolute;
+      top: -16px;
+      left: -1px;
+      box-shadow: 0 0 12px #fffa65;
+      animation: flameFlicker 0.1s infinite alternate;
+    }
+
+    .flame.off {
+      display: none;
+    }
+
+    @keyframes flameFlicker {
+      from { transform: scale(1); }
+      to { transform: scale(1.15); }
+    }
+
+    /* AŞAMA 3: Şifre Kutusu */
+    .box-card {
+      background: #1f1f2e;
+      padding: 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+    }
+
+    .input-group {
+      margin-top: 20px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #0f0f1a;
+      color: #fff;
+      font-size: 1rem;
+      text-align: center;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #ff416c;
+    }
+
+    .error-msg {
+      color: #ff4d4d;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
+
+    /* AŞAMA 4: Mektup ve Fotoğraf */
+    .letter-card {
+      background: #1a1a24;
+      padding: 25px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+    }
+
+    .letter-card h2 {
+      text-align: center;
+      color: #ff416c;
+      margin-bottom: 15px;
+    }
+
+    .letter-card p {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #d1d1d1;
+      margin-bottom: 15px;
+    }
+
+    .photo-frame {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 15px 0;
+      border: 2px solid #ff416c;
+    }
+
+    .photo-frame img {
+      width: 100%;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow"></div>
+
+  <!-- Arka Plan Müziği (Aşama 4'te çalacak) -->
+  <!-- Müzik bağlantısını buraya koyabilirsin -->
+  <audio id="bg-music" loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- AŞAMA 1: Tıklamalı Hikaye -->
+  <div id="step1" class="step active" onclick="nextStory()">
+    <div id="story-text" class="story-text">...</div>
+    <div class="tap-hint">Ekrana Dokun 👇</div>
+    <button id="start-btn" class="btn" style="display: none;" onclick="goToStep(2)">Maceraya Başla ✨</button>
+  </div>
+
+  <!-- AŞAMA 2: Mum Üfleme -->
+  <div id="step2" class="step">
+    <h2>Dilek Tut & Üfle! 🎂</h2>
+    <p style="color: #aaa; margin-top: 5px; font-size: 0.9rem;">Mikrofona üfle veya pastaya dokun!</p>
+    
+    <div class="cake-container" onclick="extinguishCandle()">
+      <div class="cake">
+        <div class="candle">
+          <div id="flame" class="flame"></div>
+        </div>
+      </div>
+    </div>
+
+    <button id="to-step3-btn" class="btn" style="display: none;" onclick="goToStep(3)">Kutuya Git 🎁</button>
+  </div>
+
+  <!-- AŞAMA 3: Şifreli Kutu -->
+  <div id="step3" class="step">
+    <div class="box-card">
+      <h2>Sır Kutusu 🔒</h2>
+      <p style="margin-top: 10px; color: #bbb;">Sen benim neyimsin? (İngilizce)</p>
+      
+      <div class="input-group">
+        <input type="text" id="pass-input" placeholder="Cevabı yaz..." autocomplete="off" />
+        <button class="btn" style="width: 100%;" onclick="checkPassword()">Kilidi Aç 🔑</button>
+      </div>
+      <div id="error-msg" class="error-msg"></div>
+    </div>
+  </div>
+
+  <!-- AŞAMA 4: Mektup & Fotoğraf -->
+  <div id="step4" class="step">
+    <div class="letter-card">
+      <h2>Canım Kardeşim Büşra ❤️</h2>
+      <p>2003 yılında hayatımıza kattığın o neşe ve enerji, yıllar geçtikçe hiç azalmadı; aksine etrafındaki herkesi aydınlatmaya devam etti.</p>
+      <p>Hayatın boyunca karşına çıkacak tüm zorlukları o güzel gülüşünle devirmeni, hayal ettiğin her başarıya tek tek ulaşmanı ve her zaman hak ettiğin o kocaman mutlulukları yaşamanı diliyorum.</p>
+      <p>Benim için ne kadar değerli olduğunu ve seni çok sevdiğimi sakın unutma. İyi ki doğdun, iyi ki kardeşimsin!</p>
+      
+      <!-- FOTOĞRAF ALANI: İkinizin resim linkini buraya yapıştırabilirsin -->
+      <div class="photo-frame">
+        <img src="https://via.placeholder.com/400x300?text=B%C3%BC%C5%9Fra+%26+Sen" alt="Birlikte Fotoğrafınız" />
+      </div>
+
+      <h3 style="text-align: center; color: #fffa65; margin-top: 10px;">Doğum Günün Kutlu Olsun Princess! 👑</h3>
+      <button class="btn" style="width: 100%;" onclick="fireConfetti()">Seni Çok Seviyoruz! 🎉</button>
+    </div>
+  </div>
+
+  <script>
+    // --- AŞAMA 1 MANTIĞI ---
+    const stories = [
+      "Merhaba My Sister...",
+      "Bugün senin için çok özel bir gün...",
+      "Sana küçük ama tatlı bir sürpriz hazırladık.",
+      "İçeride seni nelerin beklediğini görmek için heyecanlı mısın?"
+    ];
+    let storyIndex = 0;
+    const storyTextEl = document.getElementById('story-text');
+    const startBtn = document.getElementById('start-btn');
+    const tapHint = document.querySelector('.tap-hint');
+
+    storyTextEl.innerText = stories[0];
+
+    function nextStory() {
+      if (storyIndex < stories.length - 1) {
+        storyIndex++;
+        storyTextEl.style.animation = 'none';
+        void storyTextEl.offsetWidth; // Reflow
+        storyTextEl.style.animation = 'fadeIn 0.5s ease forwards';
+        storyTextEl.innerText = stories[storyIndex];
+
+        if (storyIndex === stories.length - 1) {
+          tapHint.style.display = 'none';
+          startBtn.style.display = 'inline-block';
+        }
+      }
+    }
+
+    function goToStep(stepNumber) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step' + stepNumber).classList.add('active');
+
+      if (stepNumber === 2) {
+        setupMicrophone();
+      }
+    }
+
+    // --- AŞAMA 2 MANTIĞI (Mikrofon & Üfleme) ---
+    let candleBlown = false;
+
+    function extinguishCandle() {
+      if (candleBlown) return;
+      candleBlown = true;
+      document.getElementById('flame').classList.add('off');
+      fireConfetti();
+      document.getElementById('to-step3-btn').style.display = 'inline-block';
+    }
+
+    function setupMicrophone() {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const mic = audioContext.createMediaStreamSource(stream);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        mic.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        function checkBlow() {
+          if (candleBlown) return;
+          analyser.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          let average = sum / dataArray.length;
+          // Yüksek ses/üfleme frekansı algılama
+          if (average > 40) { 
+            extinguishCandle();
+          } else {
+            requestAnimationFrame(checkBlow);
+          }
+        }
+        checkBlow();
+      }).catch(err => {
+        console.log("Mikrofon izni verilmedi/desteklenmiyor, dokunmatik aktif.");
+      });
+    }
+
+    // --- AŞAMA 3 MANTIĞI (Şifre) ---
+    let attempts = 0;
+
+    function checkPassword() {
+      const input = document.getElementById('pass-input').value.trim().toLowerCase();
+      const errorEl = document.getElementById('error-msg');
+
+      if (input === 'princess') {
+        fireConfetti();
+        // Müzik başlatma
+        document.getElementById('bg-music').play().catch(() => {});
+        goToStep(4);
+      } else {
+        attempts++;
+        if (attempts >= 3) {
+          errorEl.innerText = "Pekala pes ettim! Cevap: Princess. Şimdi yazıp kutuyu açabilirsin 👑";
+        } else {
+          errorEl.innerText = `Yanlış cevap! Kalan hakkın: ${3 - attempts}`;
+        }
+      }
+    }
+
+    // --- KONFETİ EFEKTİ ---
+    function fireConfetti() {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+  </script>
+</body>
+</html>
