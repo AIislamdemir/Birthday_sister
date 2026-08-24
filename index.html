@@ -139,8 +139,7 @@ h1,h2,h3,.serif{font-family:'Cormorant Garamond', serif;}
 #intro-click-area{position:fixed; inset:0; z-index:2; cursor:pointer;}
 
 /* =========================================================
-   STAGE 2 — CAKE, in-flow flex build (no absolute-positioning
-   bugs), 3 independent candles.
+   STAGE 2 — CAKE
 ========================================================= */
 #cake-wrap{perspective:900px; margin-bottom:6px;}
 .cake{
@@ -480,6 +479,38 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     if(stageIndex >= 3) pCrown.classList.add('lit');
   }
 
+  /* ---------------- Audio Controls ---------------- */
+  const bgMusic = document.getElementById('bgMusic');
+  const musicToggle = document.getElementById('music-toggle');
+  const musicNote = document.getElementById('music-note');
+  let musicStarted = false;
+
+  function playMusic(){
+    if(musicStarted) return;
+    musicStarted = true;
+    bgMusic.play().then(() => {
+      musicToggle.classList.add('show');
+      musicToggle.textContent = '🔊';
+    }).catch(() => {
+      musicToggle.classList.add('show', 'nudge');
+      musicToggle.textContent = '🔇';
+      musicNote.textContent = 'Müzik için dokun 🎵';
+      musicNote.classList.add('show');
+    });
+  }
+
+  musicToggle.addEventListener('click', () => {
+    musicToggle.classList.remove('nudge');
+    musicNote.classList.remove('show');
+    if(bgMusic.paused){
+      bgMusic.play();
+      musicToggle.textContent = '🔊';
+    } else {
+      bgMusic.pause();
+      musicToggle.textContent = '🔇';
+    }
+  });
+
   /* ---------------- Stage switching (sequential page-tilt) ---------------- */
   const stages = ['stage1','stage2','stage3','stage4'].map(id => document.getElementById(id));
   const moodClasses = ['', 'mood-cake', 'mood-box', 'mood-letter'];
@@ -492,6 +523,11 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     const next = stages[index];
     if(current === next) return;
     switching = true;
+
+    // 3. Aşama (Aşama III · Sır) tetiklendiğinde müziği başlat
+    if(index === 2){
+      playMusic();
+    }
 
     moodClasses.forEach(c => { if(c) document.body.classList.remove(c); });
     if(moodClasses[index]) document.body.classList.add(moodClasses[index]);
@@ -518,9 +554,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     }
   }
 
-  /* ---------------- Unified particle FX engine (canvas) ----------------
-     Handles falling confetti, radial fireworks and warm embers with one
-     shared render loop for performance. */
+  /* ---------------- Unified particle FX engine (canvas) ---------------- */
   const canvas = document.getElementById('fx-canvas');
   const ctx = canvas.getContext('2d');
   function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -612,314 +646,191 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     });
   }
 
-  function elementCenter(el){
-    const r = el.getBoundingClientRect();
-    return { x: r.left + r.width/2, y: r.top + r.height/2 };
-  }
-
-  /* ================= STAGE 1 : Intro story ================= */
-  const introLinesTexts = [
-    "Merhaba My Sister...",
-    "Bugün senin için çok özel bir gün...",
-    "Sana küçük ama tatlı bir sürpriz hazırladık.",
-    "İçeride seni nelerin beklediğini görmek için heyecanlı mısın?"
-  ];
-  let introIndex = 0;
-  const introLinesEl = document.getElementById('intro-lines');
+  /* ---------------- STAGE 1 LOGIC ---------------- */
+  const introLinesContainer = document.getElementById('intro-lines');
   const introHint = document.getElementById('intro-hint');
-  const introClickArea = document.getElementById('intro-click-area');
   const startAdventureBtn = document.getElementById('startAdventureBtn');
-  let audioUnlocked = false;
+  const introClickArea = document.getElementById('intro-click-area');
 
-  function unlockAudioOnce(){
-    if(audioUnlocked) return;
-    audioUnlocked = true;
-    const music = document.getElementById('bgMusic');
-    const p = music.play();
-    if(p && p.then){
-      p.then(() => { music.pause(); music.currentTime = 0; }).catch(() => {});
+  const introTexts = [
+    "Gece göğünde milyonlarca yıldız var...",
+    "Ama bazıları tüm gökyüzünü aydınlatacak kadar özel parıldar.",
+    "Tıpkı senin gibi Büşra..."
+  ];
+  let introStep = 0;
+
+  function advanceIntro(){
+    if(introStep < introTexts.length){
+      const p = document.createElement('p');
+      p.textContent = introTexts[introStep];
+      introLinesContainer.appendChild(p);
+      introStep++;
+      if(introStep === introTexts.length){
+        introHint.style.display = 'none';
+        introClickArea.style.display = 'none';
+        startAdventureBtn.style.display = 'inline-block';
+        startAdventureBtn.classList.add('fade-in');
+      }
     }
   }
 
-  introClickArea.addEventListener('click', () => {
-    unlockAudioOnce();
-    if(introIndex >= introLinesTexts.length) return;
-    const p = document.createElement('p');
-    p.textContent = introLinesTexts[introIndex];
-    introLinesEl.appendChild(p);
-    introIndex++;
-    if(introIndex === 1){ introHint.style.display = 'none'; }
-    if(introIndex >= introLinesTexts.length){
-      startAdventureBtn.style.display = 'inline-block';
-      startAdventureBtn.classList.add('fade-in');
-      introClickArea.style.pointerEvents = 'none';
-    }
-  });
+  introClickArea.addEventListener('click', advanceIntro);
+  startAdventureBtn.addEventListener('click', () => goToStage(1));
 
-  startAdventureBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    goToStage(1);
-    initCandleStage();
-    tryPlayMusic();
-  });
-
-  /* ================= STAGE 2 : Candles (x3, breath meter) ================= */
-  const candleUnits = Array.from(document.querySelectorAll('.candle-unit'));
+  /* ---------------- STAGE 2 LOGIC (Candles + Mic) ---------------- */
+  const candleUnits = document.querySelectorAll('.candle-unit');
   const blowBtn = document.getElementById('blowBtn');
+  const breathFill = document.getElementById('breath-fill');
+  const micStatus = document.getElementById('mic-status');
   const candleMsg = document.getElementById('candle-msg');
   const toBoxBtn = document.getElementById('toBoxBtn');
-  const micStatus = document.getElementById('mic-status');
-  const breathFill = document.getElementById('breath-fill');
-  const breathWrap = document.getElementById('breath-meter-wrap');
-  let litCount = candleUnits.length;
-  let micInitialized = false;
+  let candlesLeft = 3;
 
-  function updateBlowBtnLabel(){
-    if(litCount > 0){
-      blowBtn.textContent = 'Mumu Üfle 🎂 (' + litCount + ' kaldı)';
+  function extinguishCandle(){
+    if(candlesLeft <= 0) return;
+    candlesLeft--;
+    const idx = 2 - candlesLeft;
+    const unit = candleUnits[idx];
+    if(unit){
+      const flame = unit.querySelector('.flame');
+      const smoke = unit.querySelector('.smoke-puff');
+      const rect = flame.getBoundingClientRect();
+      emberBurst(rect.left + rect.width/2, rect.top, 22);
+      flame.classList.add('out');
+      smoke.classList.add('rise');
     }
-  }
 
-  function extinguishOneCandle(fromMic){
-    if(litCount <= 0) return;
-    const unit = candleUnits.find(u => !u.classList.contains('done'));
-    if(!unit) return;
-    unit.classList.add('done');
-    const flame = unit.querySelector('.flame');
-    const smoke = unit.querySelector('.smoke-puff');
-    const c = elementCenter(flame);
-    flame.classList.add('out');
-    smoke.classList.add('rise');
-    emberBurst(c.x, c.y, 18);
-    litCount--;
-    updateBlowBtnLabel();
-
-    if(litCount > 0){
-      candleMsg.textContent = 'Bir mum daha söndü... ' + litCount + ' mum kaldı 🕯️';
+    if(candlesLeft > 0){
+      blowBtn.textContent = `Mumu Üfle 🎂 (${candlesLeft} kaldı)`;
     } else {
-      candleMsg.textContent = 'Dileğin Kabul Olsun! Şifreli Kutunun Şifresini Çözme Vakti...';
       blowBtn.style.display = 'none';
+      document.getElementById('breath-meter-wrap').style.display = 'none';
       micStatus.style.display = 'none';
-      breathWrap.style.display = 'none';
+      candleMsg.textContent = "Dileğin kabul olsun! ✨";
       toBoxBtn.style.display = 'inline-block';
       toBoxBtn.classList.add('fade-in');
-      fallingConfetti(140);
+      fireworkBurst(window.innerWidth/2, window.innerHeight*0.4, 80);
     }
   }
 
-  blowBtn.addEventListener('click', () => extinguishOneCandle(false));
-
-  function initCandleStage(){
-    if(micInitialized) return;
-    micInitialized = true;
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-      micStatus.textContent = 'Tarayıcın mikrofonu desteklemiyor — butona basarak üfleyebilirsin 🎈';
-      return;
-    }
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioCtx();
-        const source = audioCtx.createMediaStreamSource(stream);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 512;
-        analyser.smoothingTimeConstant = 0.6;
-        source.connect(analyser);
-        const data = new Uint8Array(analyser.frequencyBinCount);
-
-        const HIGH_THRESHOLD = 26;   // üfleme algılama eşiği
-        const SUSTAIN_MS = 260;      // gerçek bir nefes için gereken süre
-        const COOLDOWN_MS = 500;     // aynı nefesin iki kez sayılmasını önler
-        let highSince = null;
-        let cooldownUntil = 0;
-
-        micStatus.innerHTML = '<span class="live-dot"></span>Mikrofon dinliyor — üfleyebilirsin!';
-
-        function checkBlow(){
-          if(litCount <= 0){
-            stream.getTracks().forEach(t => t.stop());
-            return;
-          }
-          analyser.getByteFrequencyData(data);
-          let sum = 0;
-          for(let i=0;i<data.length;i++) sum += data[i];
-          const avg = sum / data.length;
-          const now = performance.now();
-
-          breathFill.style.width = Math.min(100, (avg/55)*100) + '%';
-
-          if(avg > HIGH_THRESHOLD && now > cooldownUntil){
-            if(highSince === null) highSince = now;
-            if(now - highSince > SUSTAIN_MS){
-              extinguishOneCandle(true);
-              highSince = null;
-              cooldownUntil = now + COOLDOWN_MS;
-              breathFill.style.width = '0%';
-            }
-          } else if(avg <= HIGH_THRESHOLD){
-            highSince = null;
-          }
-
-          if(litCount > 0){
-            requestAnimationFrame(checkBlow);
-          } else {
-            stream.getTracks().forEach(t => t.stop());
-          }
-        }
-        checkBlow();
-      })
-      .catch(() => {
-        micStatus.textContent = 'Mikrofona erişilemedi — butona basarak üfleyebilirsin 🎈';
-      });
-  }
-
+  blowBtn.addEventListener('click', extinguishCandle);
   toBoxBtn.addEventListener('click', () => goToStage(2));
 
-  /* ================= STAGE 3 : Password box ================= */
+  // Microphone Detection
+  if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const mic = audioCtx.createMediaStreamSource(stream);
+      const analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      mic.connect(analyser);
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      micStatus.innerHTML = '<span class="live-dot"></span> Mikrofon aktif! Güçlüce üfleyebilirsin 🌬️';
+
+      let blowVolumeTime = 0;
+      function checkMic(){
+        if(candlesLeft <= 0) return;
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for(let i=0; i<dataArray.length; i++) sum += dataArray[i];
+        let average = sum / dataArray.length;
+        
+        let pct = Math.min(100, (average / 50) * 100);
+        breathFill.style.width = pct + '%';
+
+        if(average > 42){
+          blowVolumeTime++;
+          if(blowVolumeTime > 12){
+            extinguishCandle();
+            blowVolumeTime = 0;
+          }
+        } else {
+          blowVolumeTime = Math.max(0, blowVolumeTime - 1);
+        }
+        requestAnimationFrame(checkMic);
+      }
+      checkMic();
+    }).catch(() => {
+      // Mic access disabled fallback
+    });
+  }
+
+  /* ---------------- STAGE 3 LOGIC (Secret Box) ---------------- */
   const pwForm = document.getElementById('pw-form');
   const pwInput = document.getElementById('pw-input');
   const pwStatus = document.getElementById('pw-status');
   const pwHearts = document.getElementById('pw-hearts');
-  const boxWrap = document.getElementById('boxWrap');
   const boxLid = document.getElementById('boxLid');
-  const boxGlow = document.getElementById('boxGlow');
   const boxBeam = document.getElementById('boxBeam');
+  const boxGlow = document.getElementById('boxGlow');
+  const boxWrap = document.getElementById('boxWrap');
   const toLetterBtn = document.getElementById('toLetterBtn');
-  let attemptsLeft = 3;
-  let boxUnlocked = false;
-  const CORRECT_ANSWER = 'princess';
 
-  function renderHearts(){
-    pwHearts.innerHTML = 'Kalan hakkın: ' + '<span class="heart-pop">💗 </span>'.repeat(attemptsLeft).trim();
-  }
-
-  function unlockBox(){
-    boxUnlocked = true;
-    boxLid.classList.add('open');
-    boxGlow.classList.add('burst');
-    boxBeam.classList.add('on');
-    pwStatus.style.color = 'var(--gold-soft)';
-    pwStatus.textContent = 'Kilit açıldı! 👑';
-    pwForm.style.display = 'none';
-    pwHearts.style.display = 'none';
-    toLetterBtn.style.display = 'inline-block';
-    toLetterBtn.classList.add('fade-in');
-    const c = elementCenter(boxWrap);
-    fireworkBurst(c.x, c.y - 40, 90);
-    setTimeout(() => fireworkBurst(c.x, c.y - 60, 60), 220);
-  }
+  let hearts = 3;
+  const validAnswers = ['sister', 'my sister', 'best friend', 'kardeşim', 'prenses', 'princess'];
 
   pwForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    if(boxUnlocked) return;
+    if(hearts <= 0) return;
+
     const val = pwInput.value.trim().toLowerCase();
-    if(val === CORRECT_ANSWER){
-      unlockBox();
+    if(validAnswers.includes(val) || val.length > 0){
+      boxLid.classList.add('open');
+      boxBeam.classList.add('on');
+      boxGlow.classList.add('burst');
+      pwForm.style.display = 'none';
+      pwHearts.style.display = 'none';
+      pwStatus.style.color = '#f4d38a';
+      pwStatus.textContent = 'Harika! Sır açıldı ✨';
+      toLetterBtn.style.display = 'inline-block';
+      toLetterBtn.classList.add('fade-in');
+      fireworkBurst(window.innerWidth/2, window.innerHeight*0.45, 90);
     } else {
-      attemptsLeft--;
-      boxWrap.classList.remove('shake');
-      boxLid.classList.remove('warn');
-      void boxWrap.offsetWidth;
+      hearts--;
       boxWrap.classList.add('shake');
-      boxLid.classList.add('warn');
-      setTimeout(() => boxLid.classList.remove('warn'), 400);
-      pwInput.value = '';
-      pwInput.focus();
-      if(attemptsLeft > 0){
-        renderHearts();
-        pwStatus.style.color = 'var(--rose)';
-        pwStatus.textContent = 'Yanlış cevap, tekrar dene 🙈';
+      setTimeout(() => boxWrap.classList.remove('shake'), 500);
+
+      if(hearts === 2) pwHearts.innerHTML = 'Kalan hakkın: 💗 💗 <span style="opacity:0.3">💗</span>';
+      else if(hearts === 1) pwHearts.innerHTML = 'Kalan hakkın: 💗 <span style="opacity:0.3">💗 💗</span>';
+      else pwHearts.innerHTML = 'Kalan hakkın: <span style="opacity:0.3">💗 💗 💗</span>';
+
+      if(hearts <= 0){
+        pwStatus.textContent = 'Hakkın bitti ama sana kıyamam! Tekrar dene 💖';
+        setTimeout(() => { hearts = 3; pwHearts.innerHTML = 'Kalan hakkın: 💗 💗 💗'; }, 2000);
       } else {
-        pwHearts.textContent = 'Kalan hakkın: —';
-        pwStatus.style.color = 'var(--gold-soft)';
-        pwStatus.textContent = 'Pekala pes ettim! Cevap: Princess. Şimdi yazıp kutuyu açabilirsin 👑';
-        pwInput.value = 'Princess';
+        pwStatus.textContent = 'İpucu: İngilizce "sister" kelimesini deneyebilirsin 😉';
       }
     }
   });
 
-  /* ================= Music control ================= */
-  const bgMusic = document.getElementById('bgMusic');
-  const musicToggle = document.getElementById('music-toggle');
-  const musicNote = document.getElementById('music-note');
-  bgMusic.volume = 0.55;
-  let musicFileMissing = false;
+  toLetterBtn.addEventListener('click', () => goToStage(3));
 
-  bgMusic.addEventListener('error', () => {
-    musicFileMissing = true;
-  });
-
-  function tryPlayMusic(){
-    musicToggle.classList.add('show');
-    const playPromise = bgMusic.play();
-    if(playPromise !== undefined){
-      playPromise.then(() => {
-        musicToggle.textContent = '🔊';
-        musicToggle.classList.remove('nudge');
-        musicNote.classList.remove('show');
-      }).catch(() => {
-        musicToggle.textContent = '🔈';
-        musicToggle.classList.add('nudge');
-        if(musicFileMissing || bgMusic.error){
-          musicNote.textContent = '🎵 Müzik dosyası bulunamadı — "music.mp3" dosyasını klasöre eklemeyi unutma.';
-        } else {
-          musicNote.textContent = '🎵 Müziği başlatmak için dokun';
-        }
-        musicNote.classList.add('show');
-      });
-    }
-  }
-
-  musicToggle.addEventListener('click', () => {
-    musicToggle.classList.remove('nudge');
-    musicNote.classList.remove('show');
-    if(bgMusic.paused){
-      bgMusic.play().then(() => { musicToggle.textContent = '🔊'; }).catch(() => {
-        if(musicFileMissing || bgMusic.error){
-          musicNote.textContent = '🎵 Müzik dosyası bulunamadı — "music.mp3" dosyasını klasöre eklemeyi unutma.';
-          musicNote.classList.add('show');
-        }
-      });
-    } else {
-      bgMusic.pause();
-      musicToggle.textContent = '🔈';
-    }
-  });
-
-  toLetterBtn.addEventListener('click', () => {
-    goToStage(3);
-    tryPlayMusic();
-  });
-
-  /* ================= STAGE 4 : Envelope + Letter ================= */
+  /* ---------------- STAGE 4 LOGIC (Envelope & Letter) ---------------- */
   const envelope = document.getElementById('envelope');
   const envSeal = document.getElementById('envSeal');
   const letterPaper = document.getElementById('letter-paper');
-  let letterOpened = false;
+  const loveBtn = document.getElementById('loveBtn');
 
-  function openLetter(){
-    if(letterOpened) return;
-    letterOpened = true;
+  envelope.addEventListener('click', openEnvelope);
+  envelope.addEventListener('keydown', (e) => { if(e.key==='Enter'||e.key===' ') openEnvelope(); });
+
+  function openEnvelope(){
+    if(envelope.classList.contains('opened')) return;
     envSeal.classList.add('crack');
     setTimeout(() => {
       envelope.classList.add('opened');
-    }, 160);
-    setTimeout(() => {
-      letterPaper.classList.add('show');
-      letterPaper.scrollIntoView({behavior:'smooth', block:'center'});
-    }, 480);
+      setTimeout(() => {
+        letterPaper.classList.add('show');
+        fallingConfetti(120);
+      }, 400);
+    }, 250);
   }
-  envelope.addEventListener('click', openLetter);
-  envelope.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openLetter(); }
-  });
 
-  document.getElementById('loveBtn').addEventListener('click', (e) => {
-    const r = e.target.getBoundingClientRect();
-    fireworkBurst(r.left, r.top, 70);
-    fireworkBurst(canvas.width*0.25, canvas.height*0.35, 60);
-    fireworkBurst(canvas.width*0.75, canvas.height*0.3, 60);
-    fallingConfetti(90);
+  loveBtn.addEventListener('click', () => {
+    fallingConfetti(150);
+    fireworkBurst(window.innerWidth*0.3, window.innerHeight*0.3, 60);
+    fireworkBurst(window.innerWidth*0.7, window.innerHeight*0.3, 60);
   });
 
 })();
