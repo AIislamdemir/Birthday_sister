@@ -1,403 +1,716 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>İyi Ki Doğdun Büşra! 🎉</title>
-  <!-- Konfeti Kütüphanesi -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Büşra'ya ✨</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,500&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#0b0f2e;
+    --deep2:#1c1244;
+    --plum:#3a2159;
+    --gold:#e8b24d;
+    --gold-soft:#f4d38a;
+    --rose:#f2c9d6;
+    --cream:#f6f1e7;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:radial-gradient(ellipse at 50% 0%, var(--plum), var(--deep) 70%);
+    color:var(--cream);
+    font-family:'Quicksand', sans-serif;
+    overflow-x:hidden;
+    min-height:100vh;
+    position:relative;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+  button{
+    font-family:'Quicksand', sans-serif;
+    cursor:pointer;
+    border:none;
+    outline:none;
+  }
+  button:focus-visible, input:focus-visible{
+    outline:2px solid var(--gold-soft);
+    outline-offset:3px;
+  }
+  h1,h2,h3,.serif{
+    font-family:'Cormorant Garamond', serif;
+  }
 
-    body {
-      background: #0b0c10;
-      color: #fff;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      overflow-x: hidden;
-    }
+  /* ---------- Starfield ---------- */
+  #stars{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+  }
+  .star{
+    position:absolute;
+    background:var(--cream);
+    border-radius:50%;
+    animation:twinkle 3.5s ease-in-out infinite;
+    opacity:.5;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:.15; transform:scale(1);}
+    50%{opacity:.9; transform:scale(1.3);}
+  }
 
-    /* Arka Plan Yıldız/Işıltı Efekti */
-    .bg-glow {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 300px;
-      height: 300px;
-      background: radial-gradient(circle, rgba(255, 65, 108, 0.2) 0%, rgba(0,0,0,0) 70%);
-      pointer-events: none;
-      z-index: 0;
-    }
+  /* ---------- Constellation progress ---------- */
+  #progress{
+    position:fixed; top:18px; left:50%; transform:translateX(-50%);
+    display:flex; align-items:center; gap:10px; z-index:50;
+    opacity:0; transition:opacity .8s ease;
+  }
+  #progress.show{opacity:1;}
+  .p-star{
+    width:9px; height:9px; border-radius:50%;
+    background:rgba(246,241,231,.25);
+    box-shadow:0 0 0 rgba(232,178,77,0);
+    transition:background .5s ease, box-shadow .5s ease;
+  }
+  .p-star.lit{
+    background:var(--gold-soft);
+    box-shadow:0 0 10px 2px rgba(232,178,77,.8);
+  }
+  .p-line{
+    width:22px; height:1px; background:rgba(246,241,231,.2);
+    transition:background .5s ease;
+  }
+  .p-line.lit{ background:var(--gold-soft); }
+  .p-crown{ font-size:14px; opacity:.25; transition:opacity .6s ease, transform .6s ease; }
+  .p-crown.lit{ opacity:1; transform:scale(1.15); }
 
-    .step {
-      display: none;
-      width: 100%;
-      max-width: 420px;
-      padding: 20px;
-      text-align: center;
-      z-index: 1;
-      animation: fadeIn 0.8s ease forwards;
-    }
+  /* ---------- Stage layout ---------- */
+  .stage{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px 60px;
+    text-align:center;
+  }
+  .stage.active{ display:flex; }
+  .fade-in{ animation:fadeIn 1s ease both; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 
-    .step.active {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
+  /* ---------- Stage 1 : Intro ---------- */
+  #intro-hint{
+    font-size:15px; letter-spacing:.12em; color:var(--gold-soft);
+    animation:pulseHint 2s ease-in-out infinite;
+  }
+  @keyframes pulseHint{ 0%,100%{opacity:.5;} 50%{opacity:1;} }
+  #intro-lines{
+    display:flex; flex-direction:column; gap:14px;
+    max-width:520px; margin-bottom:34px; min-height:40px;
+  }
+  #intro-lines p{
+    font-family:'Cormorant Garamond', serif;
+    font-size:clamp(22px, 6vw, 32px);
+    font-style:italic;
+    opacity:0;
+    animation:lineIn .9s ease forwards;
+  }
+  .btn-glow{
+    background:linear-gradient(135deg, var(--gold), #c9852f);
+    color:var(--deep);
+    font-weight:700;
+    font-size:16px;
+    padding:14px 30px;
+    border-radius:40px;
+    box-shadow:0 0 22px rgba(232,178,77,.55);
+    animation:glowPulse 2.2s ease-in-out infinite;
+    transition:transform .2s ease;
+  }
+  .btn-glow:hover{ transform:translateY(-2px) scale(1.03); }
+  @keyframes glowPulse{
+    0%,100%{ box-shadow:0 0 16px rgba(232,178,77,.45); }
+    50%{ box-shadow:0 0 30px rgba(232,178,77,.85); }
+  }
+  @keyframes lineIn{ from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);} }
+  #intro-click-area{ position:fixed; inset:0; z-index:2; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(15px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  /* ---------- Stage 2 : Cake ---------- */
+  #cake-wrap{ perspective:800px; margin-bottom:26px; }
+  .cake{
+    position:relative; width:200px; margin:0 auto;
+    transform:rotateX(6deg);
+  }
+  .plate{
+    width:220px; height:16px; margin-left:-10px;
+    background:linear-gradient(180deg, var(--gold-soft), var(--gold));
+    border-radius:50%;
+    box-shadow:0 12px 30px rgba(0,0,0,.5);
+  }
+  .layer{
+    height:46px; border-radius:8px;
+    background:linear-gradient(180deg, #6d3b63, #4a2749);
+    box-shadow:inset 0 -8px 14px rgba(0,0,0,.25), 0 6px 14px rgba(0,0,0,.35);
+    position:relative;
+  }
+  .layer.top{ margin-top:-16px; }
+  .frosting{
+    position:absolute; top:-10px; left:0; right:0; height:20px;
+    background:var(--cream);
+    border-radius:50% 50% 30% 30% / 60% 60% 20% 20%;
+    box-shadow:inset 0 -4px 6px rgba(0,0,0,.08);
+  }
+  .candle{
+    position:absolute; top:-46px; left:50%; transform:translateX(-50%);
+    width:8px; height:34px; background:linear-gradient(180deg,#fff,#f4d9a0);
+    border-radius:3px;
+  }
+  .flame{
+    position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+    width:12px; height:20px;
+    background:radial-gradient(circle at 50% 70%, #fff6c9, var(--gold) 55%, #d1591f 100%);
+    border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation:flicker 1.1s ease-in-out infinite;
+    transform-origin:bottom center;
+    transition:opacity .5s ease, transform .5s ease;
+  }
+  @keyframes flicker{
+    0%,100%{ transform:translateX(-50%) scale(1) rotate(-2deg); }
+    50%{ transform:translateX(-50%) scale(1.1) rotate(3deg); }
+  }
+  .flame.out{ opacity:0; transform:translateX(-50%) scale(.2); }
+  .smoke{
+    position:absolute; top:-24px; left:50%; width:5px; height:5px;
+    background:rgba(230,230,230,.6); border-radius:50%;
+    opacity:0; pointer-events:none;
+  }
+  .smoke.rise{ animation:smokeRise 1.6s ease-out forwards; }
+  @keyframes smokeRise{
+    0%{ opacity:.7; transform:translate(-50%,0) scale(1);}
+    100%{ opacity:0; transform:translate(-70%,-60px) scale(3);}
+  }
+  #mic-hint{ font-size:13px; opacity:.65; margin:18px 0 10px; max-width:280px; }
+  #candle-msg{ min-height:30px; margin-top:18px; font-family:'Cormorant Garamond',serif; font-style:italic; font-size:20px; color:var(--gold-soft); }
 
-    /* Buton Tasarımları */
-    .btn {
-      background: linear-gradient(45deg, #ff416c, #ff4b2b);
-      color: white;
-      border: none;
-      padding: 14px 28px;
-      border-radius: 30px;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-top: 25px;
-      box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
-      transition: all 0.3s ease;
-    }
+  /* ---------- Stage 3 : Gift box ---------- */
+  .box-wrap{ position:relative; width:180px; height:150px; margin:0 auto 30px; }
+  .box-lid{
+    position:absolute; top:0; left:-6px; width:192px; height:38px;
+    background:linear-gradient(135deg,#c94f6d,#8f2f52);
+    border-radius:8px;
+    box-shadow:0 8px 16px rgba(0,0,0,.35);
+    transform-origin:left center;
+    transition:transform .8s cubic-bezier(.34,1.56,.64,1), opacity .8s ease;
+    z-index:2;
+  }
+  .box-lid::after{
+    content:"🔒"; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    font-size:20px; transition:opacity .3s ease;
+  }
+  .box-lid.open{ transform:rotateX(-130deg) translateY(-6px); opacity:.85; }
+  .box-lid.open::after{ opacity:0; }
+  .box-body{
+    position:absolute; top:34px; left:0; width:180px; height:116px;
+    background:linear-gradient(160deg,#a8395c,#6f2140);
+    border-radius:6px;
+    box-shadow:0 14px 30px rgba(0,0,0,.45), inset 0 0 30px rgba(0,0,0,.2);
+  }
+  .box-ribbon{
+    position:absolute; top:0; left:50%; width:22px; height:100%;
+    background:var(--gold-soft); transform:translateX(-50%);
+    box-shadow:0 0 10px rgba(232,178,77,.4);
+  }
+  .box-glow{
+    position:absolute; top:20px; left:50%; width:10px; height:10px;
+    transform:translateX(-50%); border-radius:50%;
+    background:var(--gold-soft); opacity:0; filter:blur(6px);
+    transition:opacity .6s ease, width .6s ease, height .6s ease;
+    z-index:1;
+  }
+  .box-glow.burst{ opacity:1; width:260px; height:260px; }
+  #pw-form{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:6px; }
+  #pw-input{
+    background:rgba(246,241,231,.08);
+    border:1px solid rgba(246,241,231,.35);
+    color:var(--cream);
+    padding:12px 16px; border-radius:30px; font-size:15px;
+    text-align:center; width:200px;
+  }
+  #pw-input::placeholder{ color:rgba(246,241,231,.45); }
+  .btn-solid{
+    background:var(--gold-soft); color:var(--deep); font-weight:700;
+    padding:12px 22px; border-radius:30px; font-size:15px;
+  }
+  .shake{ animation:shakeX .45s ease; }
+  @keyframes shakeX{
+    0%,100%{ transform:translateX(0);}
+    20%{ transform:translateX(-8px);}
+    40%{ transform:translateX(8px);}
+    60%{ transform:translateX(-6px);}
+    80%{ transform:translateX(6px);}
+  }
+  #pw-status{ min-height:24px; margin-top:14px; font-size:14px; color:var(--rose); }
+  #pw-hearts{ margin-top:6px; font-size:13px; opacity:.7; letter-spacing:.05em; }
 
-    .btn:active {
-      transform: scale(0.95);
-    }
+  /* ---------- Stage 4 : Letter ---------- */
+  .envelope{
+    position:relative; width:220px; height:150px; margin:0 auto 26px;
+    cursor:pointer;
+  }
+  .env-back{
+    position:absolute; inset:0; background:linear-gradient(160deg,#f4e6c9,#e4c98a);
+    border-radius:6px; box-shadow:0 14px 30px rgba(0,0,0,.4);
+  }
+  .env-flap{
+    position:absolute; top:0; left:0; width:100%; height:0;
+    border-left:110px solid transparent;
+    border-right:110px solid transparent;
+    border-top:75px solid #d7ac5a;
+    transform-origin:top center;
+    transition:transform .6s ease;
+  }
+  .envelope.opened .env-flap{ transform:rotateX(180deg); }
+  .env-seal{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    font-size:26px; z-index:3; transition:opacity .3s ease;
+  }
+  .envelope.opened .env-seal{ opacity:0; }
+  .env-hint{ font-size:13px; opacity:.65; margin-top:-8px; margin-bottom:20px; }
 
-    /* AŞAMA 1: Giriş Yazıları */
-    #step1 {
-      min-height: 250px;
-      justify-content: center;
-      cursor: pointer;
-    }
+  #letter-paper{
+    max-width:520px; width:100%;
+    background:linear-gradient(180deg, var(--cream), #efe6d2);
+    color:#3a2540;
+    border-radius:10px;
+    padding:38px 30px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+    transform:translateY(40px) scale(.96);
+    opacity:0;
+    max-height:0;
+    overflow:hidden;
+    transition:transform .9s cubic-bezier(.19,1,.22,1), opacity .9s ease, max-height 1s ease, padding 1s ease;
+  }
+  #letter-paper.show{
+    transform:translateY(0) scale(1);
+    opacity:1;
+    max-height:2000px;
+  }
+  #letter-paper p{
+    font-family:'Cormorant Garamond', serif;
+    font-size:19px;
+    line-height:1.75;
+    text-align:left;
+    margin-bottom:16px;
+  }
+  #letter-paper .signoff{ font-style:italic; text-align:right; font-size:20px; color:#8f2f52; }
 
-    .story-text {
-      font-size: 1.3rem;
-      line-height: 1.6;
-      color: #e0e0e0;
-      min-height: 80px;
-    }
+  .photo-frame{
+    width:170px; height:170px; margin:22px auto 6px;
+    border-radius:50%;
+    padding:6px;
+    background:linear-gradient(135deg, var(--gold-soft), var(--gold), var(--rose));
+    box-shadow:0 0 24px rgba(232,178,77,.5);
+    animation:shimmer 4s ease-in-out infinite;
+  }
+  @keyframes shimmer{
+    0%,100%{ box-shadow:0 0 18px rgba(232,178,77,.4); }
+    50%{ box-shadow:0 0 30px rgba(232,178,77,.75); }
+  }
+  .photo-frame img, .photo-frame .photo-fallback{
+    width:100%; height:100%; border-radius:50%;
+    object-fit:cover;
+    display:block;
+  }
+  .photo-fallback{
+    background:rgba(58,37,64,.06);
+    color:#8f2f52;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; text-align:center; padding:14px;
+    font-family:'Quicksand',sans-serif;
+  }
 
-    .tap-hint {
-      margin-top: 30px;
-      font-size: 0.85rem;
-      color: #ff416c;
-      animation: pulse 1.5s infinite;
-    }
+  .final-btn-wrap{ margin-top:36px; }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
+  footer.credit{
+    position:relative; z-index:1; text-align:center;
+    font-size:11px; opacity:.35; padding:20px 0 34px;
+  }
 
-    /* AŞAMA 2: Pasta ve Mumu */
-    .cake-container {
-      margin: 30px 0;
-      cursor: pointer;
-    }
+  #confetti-canvas{
+    position:fixed; inset:0; z-index:80; pointer-events:none;
+  }
 
-    .cake {
-      width: 120px;
-      height: 90px;
-      background: #f8a5c2;
-      border-radius: 10px 10px 0 0;
-      position: relative;
-      margin: 0 auto;
-      box-shadow: 0 8px 0 #f78fb3;
-    }
-
-    .candle {
-      width: 10px;
-      height: 30px;
-      background: #fff;
-      position: absolute;
-      top: -30px;
-      left: 55px;
-      border-radius: 3px;
-    }
-
-    .flame {
-      width: 12px;
-      height: 16px;
-      background: #fffa65;
-      border-radius: 50% 50% 20% 20%;
-      position: absolute;
-      top: -16px;
-      left: -1px;
-      box-shadow: 0 0 12px #fffa65;
-      animation: flameFlicker 0.1s infinite alternate;
-    }
-
-    .flame.off {
-      display: none;
-    }
-
-    @keyframes flameFlicker {
-      from { transform: scale(1); }
-      to { transform: scale(1.15); }
-    }
-
-    /* AŞAMA 3: Şifre Kutusu */
-    .box-card {
-      background: #1f1f2e;
-      padding: 30px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      width: 100%;
-    }
-
-    .input-group {
-      margin-top: 20px;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #444;
-      background: #0f0f1a;
-      color: #fff;
-      font-size: 1rem;
-      text-align: center;
-      outline: none;
-    }
-
-    input[type="text"]:focus {
-      border-color: #ff416c;
-    }
-
-    .error-msg {
-      color: #ff4d4d;
-      font-size: 0.85rem;
-      margin-top: 10px;
-    }
-
-    /* AŞAMA 4: Mektup ve Fotoğraf */
-    .letter-card {
-      background: #1a1a24;
-      padding: 25px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      text-align: left;
-    }
-
-    .letter-card h2 {
-      text-align: center;
-      color: #ff416c;
-      margin-bottom: 15px;
-    }
-
-    .letter-card p {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: #d1d1d1;
-      margin-bottom: 15px;
-    }
-
-    .photo-frame {
-      width: 100%;
-      border-radius: 12px;
-      overflow: hidden;
-      margin: 15px 0;
-      border: 2px solid #ff416c;
-    }
-
-    .photo-frame img {
-      width: 100%;
-      display: block;
-    }
-  </style>
+  @media (max-width:420px){
+    .box-wrap{ transform:scale(.9); }
+    #letter-paper{ padding:28px 20px; }
+  }
+</style>
 </head>
 <body>
 
-  <div class="bg-glow"></div>
+<div id="stars"></div>
+<canvas id="confetti-canvas"></canvas>
 
-  <!-- Arka Plan Müziği (Aşama 4'te çalacak) -->
-  <!-- Müzik bağlantısını buraya koyabilirsin -->
-  <audio id="bg-music" loop>
-    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg" />
-  </audio>
+<div id="progress">
+  <div class="p-star" data-i="0"></div>
+  <div class="p-line" data-i="0"></div>
+  <div class="p-star" data-i="1"></div>
+  <div class="p-line" data-i="1"></div>
+  <div class="p-star" data-i="2"></div>
+  <div class="p-line" data-i="2"></div>
+  <div class="p-star" data-i="3"></div>
+  <div class="p-crown">👑</div>
+</div>
 
-  <!-- AŞAMA 1: Tıklamalı Hikaye -->
-  <div id="step1" class="step active" onclick="nextStory()">
-    <div id="story-text" class="story-text">...</div>
-    <div class="tap-hint">Ekrana Dokun 👇</div>
-    <button id="start-btn" class="btn" style="display: none;" onclick="goToStep(2)">Maceraya Başla ✨</button>
-  </div>
+<audio id="bgMusic" loop preload="none">
+  <source src="muzigini-buraya-ekle.mp3" type="audio/mpeg">
+</audio>
 
-  <!-- AŞAMA 2: Mum Üfleme -->
-  <div id="step2" class="step">
-    <h2>Dilek Tut & Üfle! 🎂</h2>
-    <p style="color: #aaa; margin-top: 5px; font-size: 0.9rem;">Mikrofona üfle veya pastaya dokun!</p>
-    
-    <div class="cake-container" onclick="extinguishCandle()">
-      <div class="cake">
-        <div class="candle">
-          <div id="flame" class="flame"></div>
-        </div>
-      </div>
-    </div>
+<!-- STAGE 1 -->
+<section class="stage active" id="stage1">
+  <div id="intro-click-area"></div>
+  <div id="intro-lines"></div>
+  <p id="intro-hint">Ekrana Tıkla 👇</p>
+  <button class="btn-glow" id="startAdventureBtn" style="display:none; margin-top:26px;">Maceraya Başla ✨</button>
+</section>
 
-    <button id="to-step3-btn" class="btn" style="display: none;" onclick="goToStep(3)">Kutuya Git 🎁</button>
-  </div>
-
-  <!-- AŞAMA 3: Şifreli Kutu -->
-  <div id="step3" class="step">
-    <div class="box-card">
-      <h2>Sır Kutusu 🔒</h2>
-      <p style="margin-top: 10px; color: #bbb;">Sen benim neyimsin? (İngilizce)</p>
-      
-      <div class="input-group">
-        <input type="text" id="pass-input" placeholder="Cevabı yaz..." autocomplete="off" />
-        <button class="btn" style="width: 100%;" onclick="checkPassword()">Kilidi Aç 🔑</button>
-      </div>
-      <div id="error-msg" class="error-msg"></div>
+<!-- STAGE 2 -->
+<section class="stage" id="stage2">
+  <h2 class="serif" style="font-size:clamp(24px,6vw,32px); font-style:italic; margin-bottom:22px;">Bir dilek tut ve üfle...</h2>
+  <div id="cake-wrap">
+    <div class="cake">
+      <div class="candle"><div class="flame" id="flame"></div><div class="smoke" id="smoke"></div></div>
+      <div class="layer top"><div class="frosting"></div></div>
+      <div class="layer"></div>
+      <div class="plate"></div>
     </div>
   </div>
+  <p id="mic-hint">Mikrofonuna gerçekten üfleyebilir ya da butona basabilirsin 🎈</p>
+  <button class="btn-solid" id="blowBtn">Mumları Üfle 🎂</button>
+  <p id="candle-msg"></p>
+  <button class="btn-glow" id="toBoxBtn" style="display:none; margin-top:8px;">Kutuya Git 🎁</button>
+</section>
 
-  <!-- AŞAMA 4: Mektup & Fotoğraf -->
-  <div id="step4" class="step">
-    <div class="letter-card">
-      <h2>Canım Kardeşim Büşra ❤️</h2>
-      <p>2003 yılında hayatımıza kattığın o neşe ve enerji, yıllar geçtikçe hiç azalmadı; aksine etrafındaki herkesi aydınlatmaya devam etti.</p>
-      <p>Hayatın boyunca karşına çıkacak tüm zorlukları o güzel gülüşünle devirmeni, hayal ettiğin her başarıya tek tek ulaşmanı ve her zaman hak ettiğin o kocaman mutlulukları yaşamanı diliyorum.</p>
-      <p>Benim için ne kadar değerli olduğunu ve seni çok sevdiğimi sakın unutma. İyi ki doğdun, iyi ki kardeşimsin!</p>
-      
-      <!-- FOTOĞRAF ALANI: İkinizin resim linkini buraya yapıştırabilirsin -->
-      <div class="photo-frame">
-        <img src="https://via.placeholder.com/400x300?text=B%C3%BC%C5%9Fra+%26+Sen" alt="Birlikte Fotoğrafınız" />
-      </div>
+<!-- STAGE 3 -->
+<section class="stage" id="stage3">
+  <h2 class="serif" style="font-size:clamp(22px,6vw,28px); font-style:italic; margin-bottom:26px;">Sen benim neyimsin? <span style="opacity:.7; font-size:16px; display:block; margin-top:6px;">(İpucu: İngilizce cevapla)</span></h2>
+  <div class="box-wrap">
+    <div class="box-glow" id="boxGlow"></div>
+    <div class="box-lid" id="boxLid"></div>
+    <div class="box-body"><div class="box-ribbon"></div></div>
+  </div>
+  <form id="pw-form">
+    <input id="pw-input" type="text" autocomplete="off" placeholder="Cevabını yaz..." aria-label="Cevabını yaz">
+    <button class="btn-solid" type="submit">Aç 🔓</button>
+  </form>
+  <p id="pw-hearts">Kalan hakkın: 💗 💗 💗</p>
+  <p id="pw-status"></p>
+  <button class="btn-glow" id="toLetterBtn" style="display:none; margin-top:16px;">Mektuba Git ✉️</button>
+</section>
 
-      <h3 style="text-align: center; color: #fffa65; margin-top: 10px;">Doğum Günün Kutlu Olsun Princess! 👑</h3>
-      <button class="btn" style="width: 100%;" onclick="fireConfetti()">Seni Çok Seviyoruz! 🎉</button>
-    </div>
+<!-- STAGE 4 -->
+<section class="stage" id="stage4">
+  <h2 class="serif" style="font-size:clamp(22px,6vw,28px); font-style:italic; margin-bottom:6px;">Büşra'ya Özel Mektup ✉️</h2>
+  <p class="env-hint">Zarfa dokun</p>
+  <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Zarfı aç">
+    <div class="env-flap"></div>
+    <div class="env-back"></div>
+    <div class="env-seal">💌</div>
   </div>
 
-  <script>
-    // --- AŞAMA 1 MANTIĞI ---
-    const stories = [
-      "Merhaba My Sister...",
-      "Bugün senin için çok özel bir gün...",
-      "Sana küçük ama tatlı bir sürpriz hazırladık.",
-      "İçeride seni nelerin beklediğini görmek için heyecanlı mısın?"
-    ];
-    let storyIndex = 0;
-    const storyTextEl = document.getElementById('story-text');
-    const startBtn = document.getElementById('start-btn');
-    const tapHint = document.querySelector('.tap-hint');
+  <div id="letter-paper">
+    <p>Canım Kardeşim Büşra,</p>
+    <p>2003 yılında hayatımıza kattığın o neşe ve enerji, yıllar geçtikçe hiç azalmadı; aksine etrafındaki herkesi aydınlatmaya devam etti. Hayatın boyunca karşına çıkacak tüm zorlukları o güzel gülüşünle devirmeni, hayal ettiğin her başarıya tek tek ulaşmanı ve her zaman hak ettiğin o kocaman mutlulukları yaşamanı diliyorum.</p>
+    <p>Benim için ne kadar değerli olduğunu ve seni çok sevdiğimi sakın unutma. İyi ki doğdun, iyi ki kardeşimsin!</p>
+    <p class="signoff">Doğum Günün Kutlu Olsun Princess! 👑❤️</p>
 
-    storyTextEl.innerText = stories[0];
+    <div class="photo-frame">
+      <img src="fotografini-buraya-ekle.jpg" alt="Büşra"
+           onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'photo-fallback',innerText:'Fotoğrafını buraya ekle 📷\n(fotografini-buraya-ekle.jpg)'}))">
+    </div>
 
-    function nextStory() {
-      if (storyIndex < stories.length - 1) {
-        storyIndex++;
-        storyTextEl.style.animation = 'none';
-        void storyTextEl.offsetWidth; // Reflow
-        storyTextEl.style.animation = 'fadeIn 0.5s ease forwards';
-        storyTextEl.innerText = stories[storyIndex];
+    <div class="final-btn-wrap">
+      <button class="btn-glow" id="loveBtn">Seni Çok Seviyoruz! 🎉</button>
+    </div>
+  </div>
+</section>
 
-        if (storyIndex === stories.length - 1) {
-          tapHint.style.display = 'none';
-          startBtn.style.display = 'inline-block';
-        }
-      }
+<footer class="credit">yıldızlarla, senin için ✨</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- Starfield ---------------- */
+  const starsEl = document.getElementById('stars');
+  const STAR_COUNT = window.innerWidth < 500 ? 55 : 100;
+  for(let i=0;i<STAR_COUNT;i++){
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random()*2.4 + 0.6;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*3.5)+'s';
+    s.style.animationDuration = (2.5 + Math.random()*3)+'s';
+    starsEl.appendChild(s);
+  }
+
+  /* ---------------- Progress constellation ---------------- */
+  const progressEl = document.getElementById('progress');
+  const pStars = document.querySelectorAll('.p-star');
+  const pLines = document.querySelectorAll('.p-line');
+  const pCrown = document.querySelector('.p-crown');
+  function setProgress(stageIndex){
+    progressEl.classList.add('show');
+    pStars.forEach(el => { if(+el.dataset.i <= stageIndex) el.classList.add('lit'); });
+    pLines.forEach(el => { if(+el.dataset.i < stageIndex) el.classList.add('lit'); });
+    if(stageIndex >= 3) pCrown.classList.add('lit');
+  }
+
+  /* ---------------- Stage switching ---------------- */
+  const stages = ['stage1','stage2','stage3','stage4'].map(id => document.getElementById(id));
+  function goToStage(index){
+    stages.forEach((el,i) => el.classList.toggle('active', i === index));
+    setProgress(index);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  /* ---------------- Confetti (vanilla canvas) ---------------- */
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const confettiColors = ['#e8b24d','#f2c9d6','#f6f1e7','#c94f6d','#f4d38a'];
+  let confettiParticles = [];
+  let confettiRunning = false;
+
+  function launchConfetti(amount){
+    for(let i=0;i<amount;i++){
+      confettiParticles.push({
+        x: canvas.width/2 + (Math.random()-0.5)*canvas.width*0.6,
+        y: -20 - Math.random()*80,
+        vx: (Math.random()-0.5)*3,
+        vy: 2 + Math.random()*3,
+        size: 5 + Math.random()*6,
+        rot: Math.random()*360,
+        vr: (Math.random()-0.5)*10,
+        color: confettiColors[Math.floor(Math.random()*confettiColors.length)],
+        life: 0,
+        maxLife: 160 + Math.random()*60
+      });
     }
+    if(!confettiRunning){ confettiRunning = true; requestAnimationFrame(animateConfetti); }
+  }
 
-    function goToStep(stepNumber) {
-      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-      document.getElementById('step' + stepNumber).classList.add('active');
-
-      if (stepNumber === 2) {
-        setupMicrophone();
-      }
+  function animateConfetti(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    confettiParticles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.02; p.rot += p.vr; p.life++;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI/180);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = Math.max(0, 1 - p.life/p.maxLife);
+      ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
+      ctx.restore();
+    });
+    confettiParticles = confettiParticles.filter(p => p.life < p.maxLife && p.y < canvas.height + 40);
+    if(confettiParticles.length > 0){
+      requestAnimationFrame(animateConfetti);
+    } else {
+      confettiRunning = false;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
     }
+  }
 
-    // --- AŞAMA 2 MANTIĞI (Mikrofon & Üfleme) ---
-    let candleBlown = false;
+  /* ================= STAGE 1 : Intro story ================= */
+  const introLinesTexts = [
+    "Merhaba My Sister...",
+    "Bugün senin için çok özel bir gün...",
+    "Sana küçük ama tatlı bir sürpriz hazırladık.",
+    "İçeride seni nelerin beklediğini görmek için heyecanlı mısın?"
+  ];
+  let introIndex = 0;
+  const introLinesEl = document.getElementById('intro-lines');
+  const introHint = document.getElementById('intro-hint');
+  const introClickArea = document.getElementById('intro-click-area');
+  const startAdventureBtn = document.getElementById('startAdventureBtn');
 
-    function extinguishCandle() {
-      if (candleBlown) return;
-      candleBlown = true;
-      document.getElementById('flame').classList.add('off');
-      fireConfetti();
-      document.getElementById('to-step3-btn').style.display = 'inline-block';
+  introClickArea.addEventListener('click', () => {
+    if(introIndex >= introLinesTexts.length) return;
+    const p = document.createElement('p');
+    p.textContent = introLinesTexts[introIndex];
+    p.style.animationDelay = '0.05s';
+    introLinesEl.appendChild(p);
+    introIndex++;
+    if(introIndex === 1){ introHint.style.display = 'none'; }
+    if(introIndex >= introLinesTexts.length){
+      startAdventureBtn.style.display = 'inline-block';
+      startAdventureBtn.classList.add('fade-in');
+      introClickArea.style.pointerEvents = 'none';
     }
+  });
 
-    function setupMicrophone() {
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const mic = audioContext.createMediaStreamSource(stream);
-        const analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256;
-        mic.connect(analyser);
+  startAdventureBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    goToStage(1);
+    initCandleStage();
+  });
 
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+  /* ================= STAGE 2 : Candle ================= */
+  const flame = document.getElementById('flame');
+  const smoke = document.getElementById('smoke');
+  const blowBtn = document.getElementById('blowBtn');
+  const candleMsg = document.getElementById('candle-msg');
+  const toBoxBtn = document.getElementById('toBoxBtn');
+  const micHint = document.getElementById('mic-hint');
+  let candleOut = false;
+  let micInitialized = false;
 
-        function checkBlow() {
-          if (candleBlown) return;
-          analyser.getByteFrequencyData(dataArray);
+  function extinguishCandle(){
+    if(candleOut) return;
+    candleOut = true;
+    flame.classList.add('out');
+    smoke.classList.add('rise');
+    candleMsg.textContent = 'Dileğin Kabul Olsun! Şifreli Kutunun Şifresini Çözme Vakti...';
+    toBoxBtn.style.display = 'inline-block';
+    toBoxBtn.classList.add('fade-in');
+    blowBtn.style.display = 'none';
+    launchConfetti(140);
+  }
+
+  blowBtn.addEventListener('click', extinguishCandle);
+
+  function initCandleStage(){
+    if(micInitialized) return;
+    micInitialized = true;
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      micHint.textContent = 'Tarayıcın mikrofonu desteklemiyor — butona basarak üfleyebilirsin 🎈';
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 512;
+        source.connect(analyser);
+        const data = new Uint8Array(analyser.frequencyBinCount);
+
+        function checkBlow(){
+          if(candleOut){
+            stream.getTracks().forEach(t => t.stop());
+            return;
+          }
+          analyser.getByteFrequencyData(data);
           let sum = 0;
-          for (let i = 0; i < dataArray.length; i++) {
-            sum += dataArray[i];
-          }
-          let average = sum / dataArray.length;
-          // Yüksek ses/üfleme frekansı algılama
-          if (average > 40) { 
+          for(let i=0;i<data.length;i++) sum += data[i];
+          const avg = sum / data.length;
+          if(avg > 32){
             extinguishCandle();
-          } else {
-            requestAnimationFrame(checkBlow);
+            stream.getTracks().forEach(t => t.stop());
+            return;
           }
+          requestAnimationFrame(checkBlow);
         }
         checkBlow();
-      }).catch(err => {
-        console.log("Mikrofon izni verilmedi/desteklenmiyor, dokunmatik aktif.");
+      })
+      .catch(() => {
+        micHint.textContent = 'Mikrofona erişilemedi — butona basarak üfleyebilirsin 🎈';
       });
-    }
+  }
 
-    // --- AŞAMA 3 MANTIĞI (Şifre) ---
-    let attempts = 0;
+  toBoxBtn.addEventListener('click', () => goToStage(2));
 
-    function checkPassword() {
-      const input = document.getElementById('pass-input').value.trim().toLowerCase();
-      const errorEl = document.getElementById('error-msg');
+  /* ================= STAGE 3 : Password box ================= */
+  const pwForm = document.getElementById('pw-form');
+  const pwInput = document.getElementById('pw-input');
+  const pwStatus = document.getElementById('pw-status');
+  const pwHearts = document.getElementById('pw-hearts');
+  const boxLid = document.getElementById('boxLid');
+  const boxGlow = document.getElementById('boxGlow');
+  const toLetterBtn = document.getElementById('toLetterBtn');
+  let attemptsLeft = 3;
+  let boxUnlocked = false;
+  const CORRECT_ANSWER = 'princess';
 
-      if (input === 'princess') {
-        fireConfetti();
-        // Müzik başlatma
-        document.getElementById('bg-music').play().catch(() => {});
-        goToStep(4);
+  function renderHearts(){
+    pwHearts.textContent = 'Kalan hakkın: ' + '💗 '.repeat(attemptsLeft).trim();
+  }
+
+  function unlockBox(){
+    boxUnlocked = true;
+    boxLid.classList.add('open');
+    boxGlow.classList.add('burst');
+    pwStatus.style.color = 'var(--gold-soft)';
+    pwStatus.textContent = 'Kilit açıldı! 👑';
+    pwForm.style.display = 'none';
+    pwHearts.style.display = 'none';
+    toLetterBtn.style.display = 'inline-block';
+    toLetterBtn.classList.add('fade-in');
+    launchConfetti(120);
+  }
+
+  pwForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if(boxUnlocked) return;
+    const val = pwInput.value.trim().toLowerCase();
+    if(val === CORRECT_ANSWER){
+      unlockBox();
+    } else {
+      attemptsLeft--;
+      const boxWrap = document.querySelector('.box-wrap');
+      boxWrap.classList.remove('shake');
+      void boxWrap.offsetWidth;
+      boxWrap.classList.add('shake');
+      pwInput.value = '';
+      if(attemptsLeft > 0){
+        renderHearts();
+        pwStatus.style.color = 'var(--rose)';
+        pwStatus.textContent = 'Yanlış cevap, tekrar dene 🙈';
       } else {
-        attempts++;
-        if (attempts >= 3) {
-          errorEl.innerText = "Pekala pes ettim! Cevap: Princess. Şimdi yazıp kutuyu açabilirsin 👑";
-        } else {
-          errorEl.innerText = `Yanlış cevap! Kalan hakkın: ${3 - attempts}`;
-        }
+        pwHearts.textContent = 'Kalan hakkın: —';
+        pwStatus.style.color = 'var(--gold-soft)';
+        pwStatus.textContent = 'Pekala pes ettim! Cevap: Princess. Şimdi yazıp kutuyu açabilirsin 👑';
+        pwInput.value = 'Princess';
       }
     }
+  });
 
-    // --- KONFETİ EFEKTİ ---
-    function fireConfetti() {
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    }
-  </script>
+  toLetterBtn.addEventListener('click', () => {
+    goToStage(3);
+    const bgMusic = document.getElementById('bgMusic');
+    bgMusic.volume = 0.6;
+    bgMusic.play().catch(() => { /* tarayıcı otomatik oynatmayı engellemiş olabilir */ });
+  });
+
+  /* ================= STAGE 4 : Envelope + Letter ================= */
+  const envelope = document.getElementById('envelope');
+  const letterPaper = document.getElementById('letter-paper');
+  let letterOpened = false;
+
+  function openLetter(){
+    if(letterOpened) return;
+    letterOpened = true;
+    envelope.classList.add('opened');
+    setTimeout(() => {
+      letterPaper.classList.add('show');
+      letterPaper.scrollIntoView({behavior:'smooth', block:'center'});
+    }, 350);
+  }
+  envelope.addEventListener('click', openLetter);
+  envelope.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openLetter(); }
+  });
+
+  document.getElementById('loveBtn').addEventListener('click', () => launchConfetti(160));
+
+})();
+</script>
 </body>
 </html>
