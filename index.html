@@ -310,7 +310,6 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
   <div class="p-crown">👑</div>
 </div>
 
-<!-- Müzik dosyanı bu HTML ile aynı klasöre "music.mp3" adıyla koy -->
 <audio id="bgMusic" loop preload="auto">
   <source src="music.mp3" type="audio/mpeg">
 </audio>
@@ -408,7 +407,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
   </div>
 </section>
 
-</div><!-- /#book -->
+</div>
 
 <footer class="credit">yıldızlarla, senin için ✨</footer>
 
@@ -416,7 +415,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
 (function(){
   "use strict";
 
-  /* ---------------- Ambience: stars ---------------- */
+  /* Stars */
   const starsEl = document.getElementById('stars');
   const STAR_COUNT = window.innerWidth < 500 ? 55 : 100;
   const fragStars = document.createDocumentFragment();
@@ -434,7 +433,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
   }
   starsEl.appendChild(fragStars);
 
-  /* ---------------- Ambience: drifting orbs ---------------- */
+  /* Orbs */
   const orbsEl = document.getElementById('orbs');
   const orbPalette = ['#e8b24d','#f2b6c6','#8f2f52','#f4d38a'];
   const ORB_COUNT = window.innerWidth < 500 ? 4 : 7;
@@ -456,7 +455,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
   }
   orbsEl.appendChild(fragOrbs);
 
-  /* ---------------- Ambience: rising sparkle motes near cake ---------------- */
+  /* Sparkles */
   const cakeEl = document.getElementById('cake');
   for(let i=0;i<7;i++){
     const m = document.createElement('div');
@@ -467,7 +466,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     cakeEl.appendChild(m);
   }
 
-  /* ---------------- Progress constellation ---------------- */
+  /* Progress */
   const progressEl = document.getElementById('progress');
   const pStars = document.querySelectorAll('.p-star');
   const pLines = document.querySelectorAll('.p-line');
@@ -479,13 +478,13 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     if(stageIndex >= 3) pCrown.classList.add('lit');
   }
 
-  /* ---------------- Audio Controls ---------------- */
+  /* Audio */
   const bgMusic = document.getElementById('bgMusic');
   const musicToggle = document.getElementById('music-toggle');
   const musicNote = document.getElementById('music-note');
   let musicStarted = false;
 
-  function playMusic(){
+  function startMusicOnStage3(){
     if(musicStarted) return;
     musicStarted = true;
     bgMusic.play().then(() => {
@@ -511,7 +510,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     }
   });
 
-  /* ---------------- Stage switching (sequential page-tilt) ---------------- */
+  /* Stage Switching */
   const stages = ['stage1','stage2','stage3','stage4'].map(id => document.getElementById(id));
   const moodClasses = ['', 'mood-cake', 'mood-box', 'mood-letter'];
   const sheen = document.getElementById('sheen');
@@ -524,9 +523,9 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     if(current === next) return;
     switching = true;
 
-    // 3. Aşama (Aşama III · Sır) tetiklendiğinde müziği başlat
+    // 3. aşamaya (index 2) geçildiğinde müziği başlat
     if(index === 2){
-      playMusic();
+      startMusicOnStage3();
     }
 
     moodClasses.forEach(c => { if(c) document.body.classList.remove(c); });
@@ -554,7 +553,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     }
   }
 
-  /* ---------------- Unified particle FX engine (canvas) ---------------- */
+  /* FX Canvas */
   const canvas = document.getElementById('fx-canvas');
   const ctx = canvas.getContext('2d');
   function resizeCanvas(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
@@ -646,7 +645,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
     });
   }
 
-  /* ---------------- STAGE 1 LOGIC ---------------- */
+  /* Stage 1 */
   const introLinesContainer = document.getElementById('intro-lines');
   const introHint = document.getElementById('intro-hint');
   const startAdventureBtn = document.getElementById('startAdventureBtn');
@@ -677,7 +676,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
   introClickArea.addEventListener('click', advanceIntro);
   startAdventureBtn.addEventListener('click', () => goToStage(1));
 
-  /* ---------------- STAGE 2 LOGIC (Candles + Mic) ---------------- */
+  /* Stage 2 */
   const candleUnits = document.querySelectorAll('.candle-unit');
   const blowBtn = document.getElementById('blowBtn');
   const breathFill = document.getElementById('breath-fill');
@@ -716,7 +715,6 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
   blowBtn.addEventListener('click', extinguishCandle);
   toBoxBtn.addEventListener('click', () => goToStage(2));
 
-  // Microphone Detection
   if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia){
     navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -751,12 +749,10 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
         requestAnimationFrame(checkMic);
       }
       checkMic();
-    }).catch(() => {
-      // Mic access disabled fallback
-    });
+    }).catch(() => {});
   }
 
-  /* ---------------- STAGE 3 LOGIC (Secret Box) ---------------- */
+  /* Stage 3 */
   const pwForm = document.getElementById('pw-form');
   const pwInput = document.getElementById('pw-input');
   const pwStatus = document.getElementById('pw-status');
@@ -806,7 +802,7 @@ footer.credit{position:relative; z-index:1; text-align:center; font-size:11px; o
 
   toLetterBtn.addEventListener('click', () => goToStage(3));
 
-  /* ---------------- STAGE 4 LOGIC (Envelope & Letter) ---------------- */
+  /* Stage 4 */
   const envelope = document.getElementById('envelope');
   const envSeal = document.getElementById('envSeal');
   const letterPaper = document.getElementById('letter-paper');
